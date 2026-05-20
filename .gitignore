@@ -1,0 +1,18 @@
+# Build artifacts
+/bin/
+/dist/
+/csk
+/csk.exe
+
+# Go
+*.test
+*.out
+coverage.*
+go.work
+go.work.sum
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
