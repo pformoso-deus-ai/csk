@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/pelletier/go-toml/v2"
+
+	"github.com/pformoso/csk/internal/atomicfile"
 )
 
 const Version = 1
@@ -58,8 +60,7 @@ func (f *File) Save(path string) error {
 	if err != nil {
 		return err
 	}
-	// TODO(v1): atomic write.
-	return os.WriteFile(path, b, 0o644)
+	return atomicfile.WriteFile(path, b, 0o644)
 }
 
 // Validate enforces lockfile invariants.

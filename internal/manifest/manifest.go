@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"github.com/pelletier/go-toml/v2"
+
+	"github.com/pformoso/csk/internal/atomicfile"
 )
 
 const Version = 1
@@ -56,12 +58,11 @@ func Load(path string) (*File, error) {
 
 // Save atomically writes the manifest to disk (write-temp-then-rename).
 func (f *File) Save(path string) error {
-	// TODO(v1): implement atomic write
 	b, err := toml.Marshal(f)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, b, 0o644)
+	return atomicfile.WriteFile(path, b, 0o644)
 }
 
 // Validate enforces manifest invariants.
