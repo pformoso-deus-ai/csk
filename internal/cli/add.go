@@ -99,10 +99,21 @@ func newAddCmd() *cobra.Command {
 				ctx = context.Background()
 			}
 
+			// Track whether the cache dir already existed before this invocation.
+			// If we cloned it as part of this `csk add` and then fail validation
+			// downstream, roll back the clone so a corrected retry isn't blocked.
+			cachePreExisted := false
+			if _, statErr := os.Stat(cache.CacheDir(s, tentative)); statErr == nil {
+				cachePreExisted = true
+			}
+
 			// Clone or fetch, resolve ref → commit.
 			plan := cache.Plan{Name: tentative, Source: source, Ref: ref, Subdir: subdirFlag}
 			commit, err := cache.Resolve(ctx, s, plan)
 			if err != nil {
+				if !cachePreExisted {
+					_ = os.RemoveAll(cache.CacheDir(s, tentative))
+				}
 				return envErr(err)
 			}
 			plan.Commit = commit
@@ -110,16 +121,32 @@ func newAddCmd() *cobra.Command {
 			// SKILL.md-based name upgrade, only on a fresh add (no --name, no
 			// existing source match).
 			finalName := tentative
+
+			// rollback removes the cache dir we just created if and only if it
+			// didn't exist before this add. If the SKILL.md upgrade renamed
+			// the dir, we remove the renamed location instead.
+			rollback := func() {
+				if cachePreExisted {
+					return
+				}
+				_ = os.RemoveAll(cache.CacheDir(s, tentative))
+				if finalName != tentative {
+					_ = os.RemoveAll(cache.CacheDir(s, finalName))
+				}
+			}
 			if nameFlag == "" && existingNameForSource == "" {
 				if fm, ferr := skill.ReadFrontmatter(cache.LinkTarget(s, plan)); ferr == nil && fm.Name != "" && fm.Name != tentative {
 					if _, ok := mf.Skills[fm.Name]; ok {
+						rollback()
 						return userErr(fmt.Errorf("SKILL.md declares name %q which is already in the manifest under a different source", fm.Name))
 					}
 					newDir := cache.CacheDir(s, fm.Name)
 					if _, err := os.Stat(newDir); err == nil {
+						rollback()
 						return userErr(fmt.Errorf("SKILL.md declares name %q but cache dir %s already exists", fm.Name, newDir))
 					}
 					if err := os.Rename(cache.CacheDir(s, tentative), newDir); err != nil {
+						rollback()
 						return envErr(err)
 					}
 					finalName = fm.Name
@@ -129,6 +156,7 @@ func newAddCmd() *cobra.Command {
 
 			// Require SKILL.md at the final target.
 			if _, ferr := skill.ReadFrontmatter(cache.LinkTarget(s, plan)); ferr != nil {
+				rollback()
 				if errors.Is(ferr, os.ErrNotExist) {
 					return userErr(fmt.Errorf("no SKILL.md at %s — is this a Claude Code skill?", cache.LinkTarget(s, plan)))
 				}
@@ -136,15 +164,18 @@ func newAddCmd() *cobra.Command {
 			}
 
 			if err := cache.Reconcile(ctx, s, plan, false); err != nil {
+				rollback()
 				return envErr(err)
 			}
 
 			mf.Skills[finalName] = manifest.Entry{Source: source, Ref: refFlag, Subdir: subdirFlag}
 			lf.Upsert(lockfile.Entry{Name: finalName, Source: source, Ref: ref, Commit: commit, Subdir: subdirFlag})
 			if err := mf.Save(s.ManifestPath); err != nil {
+				rollback()
 				return envErr(err)
 			}
 			if err := lf.Save(s.LockfilePath); err != nil {
+				rollback()
 				return envErr(err)
 			}
 

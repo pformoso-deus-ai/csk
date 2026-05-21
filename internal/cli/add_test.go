@@ -145,6 +145,62 @@ func TestAdd_DuplicateNameDifferentSourceFails(t *testing.T) {
 	}
 }
 
+func TestAdd_RollsBackCacheOnValidationFailure(t *testing.T) {
+	home := useFakeHome(t)
+	if _, err := runCSK(t, "--global", "init"); err != nil {
+		t.Fatal(err)
+	}
+	// Repo has SKILL.md inside subdir/, not at the root. First `csk add`
+	// without --subdir should fail with no-SKILL.md, AND should leave no
+	// orphaned cache dir so a corrected retry works.
+	repo := makeFixtureRepo(t, t.TempDir(), "monorepo", "handoff", "pkg/handoff")
+
+	cacheDir := filepath.Join(home, ".claude", "skills-cache", "monorepo")
+
+	_, err := runCSK(t, "--global", "add", repo)
+	if err == nil {
+		t.Fatal("expected validation failure (no SKILL.md at root)")
+	}
+	if _, statErr := os.Stat(cacheDir); !os.IsNotExist(statErr) {
+		t.Errorf("expected cache dir cleaned up after failed add, statErr=%v", statErr)
+	}
+
+	// Retry with --subdir should succeed without needing manual cleanup.
+	if _, err := runCSK(t, "--global", "add", repo, "--subdir", "pkg/handoff"); err != nil {
+		t.Fatalf("retry with --subdir failed: %v", err)
+	}
+}
+
+func TestAdd_PreservesPreExistingCache(t *testing.T) {
+	home := useFakeHome(t)
+	if _, err := runCSK(t, "--global", "init"); err != nil {
+		t.Fatal(err)
+	}
+	repo := makeFixtureRepo(t, t.TempDir(), "handoff", "handoff", "")
+	// First successful add populates the cache.
+	if _, err := runCSK(t, "--global", "add", repo); err != nil {
+		t.Fatal(err)
+	}
+	cacheDir := filepath.Join(home, ".claude", "skills-cache", "handoff")
+	// Mark the cache so we can tell whether csk wiped it.
+	sentinel := filepath.Join(cacheDir, ".sentinel")
+	if err := os.WriteFile(sentinel, []byte("keep me"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Now try a second add that should fail (different source, no --force).
+	other := makeFixtureRepo(t, t.TempDir(), "handoff", "handoff", "")
+	_, err := runCSK(t, "--global", "add", other, "--name", "handoff")
+	if err == nil {
+		t.Fatal("expected conflict failure")
+	}
+	// The pre-existing cache must NOT be wiped — rollback should only fire
+	// for caches this invocation created.
+	if _, err := os.Stat(sentinel); err != nil {
+		t.Errorf("expected sentinel preserved (pre-existing cache untouched): %v", err)
+	}
+}
+
 func TestAdd_Subdir(t *testing.T) {
 	home := useFakeHome(t)
 	if _, err := runCSK(t, "--global", "init"); err != nil {
