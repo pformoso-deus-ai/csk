@@ -41,7 +41,7 @@ csk init
 
 # Add a skill from any git URL — clones, resolves ref → SHA, writes manifest + lockfile,
 # creates the junction Claude Code reads.
-csk add https://github.com/pablo/handoff-skill.git
+csk add https://github.com/pformoso-deus-ai/handoff-claude-skill.git
 
 # Inspect what's installed
 csk list
@@ -90,7 +90,7 @@ Run any command with `--help` for its full flag surface.
 version = 1
 
 [skills.handoff]
-source = "https://github.com/pablo/handoff-skill.git"
+source = "https://github.com/pformoso-deus-ai/handoff-claude-skill.git"
 ref = "main"                       # branch, tag, or commit. Default: "main".
 # subdir = "packages/handoff"      # optional, for monorepos.
 ```
@@ -107,7 +107,7 @@ generated = "2026-05-21T09:34:00Z"
 
 [[skill]]
 name = "handoff"
-source = "https://github.com/pablo/handoff-skill.git"
+source = "https://github.com/pformoso-deus-ai/handoff-claude-skill.git"
 ref = "main"
 commit = "a1b2c3d4e5f6789abcdef..."
 subdir = ""
@@ -119,7 +119,7 @@ subdir = ""
 
 ```sh
 csk init
-csk add https://github.com/pablo/handoff-skill.git
+csk add https://github.com/pformoso-deus-ai/handoff-claude-skill.git
 csk add https://github.com/pablo/codegraph-skill.git
 # commit ~/.claude/skills.toml and ~/.claude/skills.lock to your dotfiles
 ```
@@ -142,7 +142,7 @@ Teammates clone the project and `csk install` to get the project's skills set up
 ```sh
 # You already have ~/.claude/skills/handoff/ from a previous manual clone.
 csk init
-csk adopt handoff --source https://github.com/pablo/handoff-skill.git
+csk adopt handoff --source https://github.com/pformoso-deus-ai/handoff-claude-skill.git
 # csk byte-diffs your local content against the source. If they match, your
 # directory is replaced with a junction into the csk-managed cache and the
 # skill is registered. If they diverge, csk lists the differences and
