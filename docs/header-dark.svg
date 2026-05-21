@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 240" role="img" aria-label="csk — git-native skill manager for Claude Code">
+  <style>
+    .wordmark { font: 700 64px ui-monospace, 'Cascadia Mono', 'Roboto Mono', monospace; fill: #4493f8; }
+    .tagline  { font: 400 16px ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; fill: #9198a1; }
+    .label    { font: 600 14px ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; fill: #f0f6fc; }
+    .sublabel { font: 400 12px ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; fill: #9198a1; }
+    .verb     { font: 600 11px ui-monospace, 'Cascadia Mono', monospace; fill: #4493f8; }
+    .box      { fill: none; stroke: #f0f6fc; stroke-width: 1.5; }
+    .arrow    { stroke: #f0f6fc; stroke-width: 1.5; fill: none; }
+    .head     { fill: #f0f6fc; }
+  </style>
+
+  <text x="40" y="78" class="wordmark">csk</text>
+  <text x="40" y="110" class="tagline">git-native skill manager for Claude Code</text>
+
+  <g transform="translate(40,150)">
+    <rect x="0" y="0" width="200" height="64" rx="6" class="box"/>
+    <text x="100" y="28" text-anchor="middle" class="label">skills.toml</text>
+    <text x="100" y="48" text-anchor="middle" class="sublabel">declared sources</text>
+
+    <text x="240" y="20" text-anchor="middle" class="verb">csk lock</text>
+    <line x1="208" y1="32" x2="266" y2="32" class="arrow"/>
+    <polygon points="266,26 280,32 266,38" class="head"/>
+
+    <rect x="288" y="0" width="200" height="64" rx="6" class="box"/>
+    <text x="388" y="28" text-anchor="middle" class="label">skills.lock</text>
+    <text x="388" y="48" text-anchor="middle" class="sublabel">pinned SHAs</text>
+
+    <text x="528" y="20" text-anchor="middle" class="verb">csk install</text>
+    <line x1="496" y1="32" x2="554" y2="32" class="arrow"/>
+    <polygon points="554,26 568,32 554,38" class="head"/>
+
+    <rect x="576" y="0" width="244" height="64" rx="6" class="box"/>
+    <text x="698" y="28" text-anchor="middle" class="label">~/.claude/skills/</text>
+    <text x="698" y="48" text-anchor="middle" class="sublabel">symlink &#8226; junction</text>
+  </g>
+</svg>
