@@ -34,8 +34,16 @@ func (execRunner) Run(ctx context.Context, dir string, args ...string) ([]byte, 
 var Default Runner = execRunner{}
 
 // Clone runs `git clone <source> <dest>`.
+//
+// We pin `core.autocrlf=false` on the resulting repo so working-tree bytes
+// match what's actually in the commit — necessary for the byte-equal diff in
+// `csk adopt` and for cross-platform reproducibility of skill content.
 func Clone(ctx context.Context, source, dest string) error {
-	_, err := Default.Run(ctx, "", "clone", "--", source, dest)
+	_, err := Default.Run(ctx, "",
+		"-c", "core.autocrlf=false",
+		"clone",
+		"--config", "core.autocrlf=false",
+		"--", source, dest)
 	return err
 }
 
@@ -52,13 +60,22 @@ func Checkout(ctx context.Context, dir, ref string) error {
 }
 
 // ResolveRef returns the commit SHA that <ref> currently points to inside dir.
-// Equivalent to `git rev-parse <ref>^{commit}`.
+//
+// For branch refs we want the freshest commit after a `git fetch`, which
+// lives at the remote-tracking ref `origin/<ref>`, not at the local branch
+// (a `fetch` does not advance local branches). We try `origin/<ref>` first
+// and fall back to `<ref>` so tags and bare SHAs still resolve.
 func ResolveRef(ctx context.Context, dir, ref string) (string, error) {
-	out, err := Default.Run(ctx, dir, "rev-parse", ref+"^{commit}")
-	if err != nil {
-		return "", err
+	candidates := []string{"origin/" + ref, ref}
+	var lastErr error
+	for _, r := range candidates {
+		out, err := Default.Run(ctx, dir, "rev-parse", "--verify", r+"^{commit}")
+		if err == nil {
+			return strings.TrimSpace(string(out)), nil
+		}
+		lastErr = err
 	}
-	return strings.TrimSpace(string(out)), nil
+	return "", lastErr
 }
 
 // IsDirty reports whether the working tree at dir has uncommitted changes.
