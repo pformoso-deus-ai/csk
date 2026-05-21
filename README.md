@@ -33,6 +33,85 @@ What you get:
 
 Zero coupling to Claude Code itself: `csk` writes to the same `~/.claude/skills/` paths Claude already reads. Claude Code needs no awareness of `csk`.
 
+## Install
+
+`csk` is a single static binary. Install it to a user-scoped directory so you never need `sudo`, and so `csk upgrade` can replace it in place.
+
+### macOS / Linux
+
+```sh
+mkdir -p ~/.local/bin
+
+# Detect platform and download the latest release.
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m); case "$ARCH" in x86_64|amd64) ARCH=x86_64;; aarch64|arm64) ARCH=arm64;; esac
+VERSION=$(curl -sI https://github.com/pformoso-deus-ai/csk/releases/latest | awk -F/ '/^location:/ {gsub("\r",""); print $NF}')
+curl -fsSL "https://github.com/pformoso-deus-ai/csk/releases/download/${VERSION}/csk_${VERSION#v}_${OS}_${ARCH}.tar.gz" \
+  | tar xz -C ~/.local/bin csk
+chmod +x ~/.local/bin/csk
+```
+
+If `csk` isn't found after install, add `~/.local/bin` to your `PATH`. Pick the line that matches your shell:
+
+```sh
+# zsh (macOS default)
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+
+# bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+
+# fish
+fish_add_path ~/.local/bin
+```
+
+### Windows
+
+PowerShell, user-scoped install:
+
+```powershell
+$dest = "$env:LOCALAPPDATA\Programs\csk"
+New-Item -ItemType Directory -Force -Path $dest | Out-Null
+
+$arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'arm64' } else { 'x86_64' }
+$latest = (Invoke-WebRequest -UseBasicParsing -Uri 'https://github.com/pformoso-deus-ai/csk/releases/latest' -MaximumRedirection 0 -ErrorAction SilentlyContinue).Headers.Location
+$tag = $latest.Split('/')[-1]                          # e.g. v0.1.2
+$ver = $tag.TrimStart('v')
+$url = "https://github.com/pformoso-deus-ai/csk/releases/download/$tag/csk_${ver}_windows_${arch}.zip"
+
+Invoke-WebRequest -Uri $url -OutFile "$env:TEMP\csk.zip"
+Expand-Archive -Force -Path "$env:TEMP\csk.zip" -DestinationPath $dest
+
+# Persist on user PATH (new terminals pick it up automatically)
+$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+if (-not ($userPath.Split(';') -contains $dest)) {
+    [Environment]::SetEnvironmentVariable('Path', "$userPath;$dest", 'User')
+}
+# Make it available in this session too
+$env:Path += ";$dest"
+
+csk --help
+```
+
+If you don't want to touch the user-PATH environment variable, just keep `csk.exe` somewhere already on `PATH` (e.g. inside an existing `bin` folder you manage). No admin or developer mode is required.
+
+### With Go
+
+If you have Go 1.23+ installed:
+
+```sh
+go install github.com/pformoso-deus-ai/csk/cmd/csk@latest
+# binary lands in `go env GOPATH`/bin — usually already on PATH
+```
+
+### Subsequent upgrades
+
+Once installed, future versions are one command — no re-download, no `sudo`:
+
+```sh
+csk upgrade           # check, download, verify SHA256, swap binary
+csk upgrade --check   # preview only
+```
+
 ## Quickstart
 
 ```sh
