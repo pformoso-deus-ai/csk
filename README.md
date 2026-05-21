@@ -118,8 +118,13 @@ csk upgrade --check   # preview only
 # One-time: stand up the global scope
 csk init
 
-# Add a skill from any git URL — clones, resolves ref → SHA, writes manifest + lockfile,
-# creates the junction Claude Code reads.
+# Browse the public registry (Skill Central) and install by short name…
+csk search                                              # list everything
+csk search handoff                                      # fuzzy search
+csk info handoff                                        # full entry
+csk add handoff                                         # install by registry name
+
+# …or install directly from any git URL:
 csk add https://github.com/pformoso-deus-ai/handoff-claude-skill.git
 
 # Inspect what's installed
@@ -160,6 +165,8 @@ For a per-project skill set, run the same commands from inside the project. `csk
 | `csk list` | Tabular view of every skill with state: `clean` / `drifted` / `missing` / `unlinked` / `manifest-only` / `lock-only` |
 | `csk adopt <name> --source URL` | Register a hand-installed skill: byte-diff existing dir against the source, swap to junction on match |
 | `csk doctor` | Read-only diagnosis of cache / junction / manifest / lockfile drift |
+| `csk search [query]` | Fuzzy-search the public registry (Skill Central). No arg = list all. |
+| `csk info <name>` | Show the full registry entry for a skill. |
 | `csk upgrade` | Replace the csk binary itself with the latest GitHub release. `--check` only previews. |
 
 Run any command with `--help` for its full flag surface.

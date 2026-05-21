@@ -12,6 +12,7 @@ import (
 	"github.com/pformoso-deus-ai/csk/internal/lockfile"
 	"github.com/pformoso-deus-ai/csk/internal/manifest"
 	"github.com/pformoso-deus-ai/csk/internal/procguard"
+	"github.com/pformoso-deus-ai/csk/internal/registry"
 	"github.com/pformoso-deus-ai/csk/internal/skill"
 )
 
@@ -40,6 +41,36 @@ func newAddCmd() *cobra.Command {
 					return userErr(fmt.Errorf("no manifest at %s — run `csk init` first", s.ManifestPath))
 				}
 				return envErr(err)
+			}
+
+			ctxAdd := cmd.Context()
+			if ctxAdd == nil {
+				ctxAdd = context.Background()
+			}
+
+			// If <source> isn't a URL/path, treat it as a registry name and
+			// resolve via the published index. The user-typed name becomes
+			// the install name unless --name overrides it.
+			if registry.LooksLikeRegistryName(source) {
+				idx, ferr := registry.New().Fetch(ctxAdd, false)
+				if ferr != nil {
+					return envErr(fmt.Errorf("looking up %q in registry: %w", source, ferr))
+				}
+				entry := idx.Find(source)
+				if entry == nil {
+					return userErr(fmt.Errorf("skill %q not found in registry — pass a git URL instead, or check `csk search`", source))
+				}
+				if nameFlag == "" {
+					nameFlag = entry.Name
+				}
+				if subdirFlag == "" {
+					subdirFlag = entry.Subdir
+				}
+				if refFlag == "" && entry.DefaultRef != "" {
+					refFlag = entry.DefaultRef
+				}
+				source = entry.Source
+				fmt.Fprintf(cmd.OutOrStdout(), "csk: resolved %s → %s\n", entry.Name, source)
 			}
 
 			g, err := procguard.Acquire(s.ProcLockPath)
@@ -94,10 +125,7 @@ func newAddCmd() *cobra.Command {
 				}
 			}
 
-			ctx := cmd.Context()
-			if ctx == nil {
-				ctx = context.Background()
-			}
+			ctx := ctxAdd
 
 			// Track whether the cache dir already existed before this invocation.
 			// If we cloned it as part of this `csk add` and then fail validation
