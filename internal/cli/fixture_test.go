@@ -2,6 +2,7 @@ package cli_test
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -51,4 +52,61 @@ func makeFixtureRepo(t *testing.T, basedir, repoName, skillName, subdirPath stri
 	run("add", ".")
 	run("commit", "-q", "-m", "initial")
 	return repo
+}
+
+// commitToFixtureRepo adds a new file and creates a follow-up commit on the
+// fixture repo's current branch. Used to simulate upstream movement for
+// update tests.
+func commitToFixtureRepo(t *testing.T, repo, filename, content string) {
+	t.Helper()
+	if err := os.WriteFile(filepath.Join(repo, filename), []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	run := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command("git", args...)
+		cmd.Dir = repo
+		cmd.Env = append(os.Environ(),
+			"GIT_COMMITTER_NAME=Test", "GIT_COMMITTER_EMAIL=test@example.com",
+			"GIT_AUTHOR_NAME=Test", "GIT_AUTHOR_EMAIL=test@example.com",
+		)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v\n%s", args, err, out)
+		}
+	}
+	run("add", filename)
+	run("commit", "-q", "-m", "follow-up")
+}
+
+// handInstall copies repoSrc's working tree (excluding .git) into installDest.
+// Used by adopt tests to set up the "skill is already installed by hand"
+// precondition: a regular directory at <skills>/<name>/ with a SKILL.md.
+func handInstall(t *testing.T, repoSrc, installDest string) {
+	t.Helper()
+	if err := os.MkdirAll(installDest, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	err := filepath.WalkDir(repoSrc, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, _ := filepath.Rel(repoSrc, p)
+		if rel == "." {
+			return nil
+		}
+		if d.IsDir() {
+			if d.Name() == ".git" {
+				return fs.SkipDir
+			}
+			return os.MkdirAll(filepath.Join(installDest, rel), 0o755)
+		}
+		data, err := os.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(filepath.Join(installDest, rel), data, 0o644)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 }
