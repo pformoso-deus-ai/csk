@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/pformoso/csk/internal/lockfile"
+	"github.com/pformoso-deus-ai/csk/internal/lockfile"
 )
 
 // TestLock_RebuildsFromManifestOnly is the full round-trip from the spec

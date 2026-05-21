@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/pformoso/csk/internal/lockfile"
-	"github.com/pformoso/csk/internal/manifest"
-	"github.com/pformoso/csk/internal/procguard"
+	"github.com/pformoso-deus-ai/csk/internal/lockfile"
+	"github.com/pformoso-deus-ai/csk/internal/manifest"
+	"github.com/pformoso-deus-ai/csk/internal/procguard"
 )
 
 func newInitCmd() *cobra.Command {

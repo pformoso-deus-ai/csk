@@ -7,7 +7,7 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/pformoso/csk/internal/atomicfile"
+	"github.com/pformoso-deus-ai/csk/internal/atomicfile"
 )
 
 const Version = 1

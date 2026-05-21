@@ -9,10 +9,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/pformoso/csk/internal/cache"
-	"github.com/pformoso/csk/internal/gitx"
-	"github.com/pformoso/csk/internal/link"
-	"github.com/pformoso/csk/internal/skill"
+	"github.com/pformoso-deus-ai/csk/internal/cache"
+	"github.com/pformoso-deus-ai/csk/internal/gitx"
+	"github.com/pformoso-deus-ai/csk/internal/link"
+	"github.com/pformoso-deus-ai/csk/internal/skill"
 )
 
 func newDoctorCmd() *cobra.Command {

@@ -3,8 +3,8 @@ package cli
 import (
 	"errors"
 
-	"github.com/pformoso/csk/internal/exitcode"
-	"github.com/pformoso/csk/internal/procguard"
+	"github.com/pformoso-deus-ai/csk/internal/exitcode"
+	"github.com/pformoso-deus-ai/csk/internal/procguard"
 )
 
 // userErrf wraps an error as a UserError. Use for invalid input, missing

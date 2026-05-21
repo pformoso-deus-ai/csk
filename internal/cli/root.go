@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/pformoso/csk/internal/scope"
+	"github.com/pformoso-deus-ai/csk/internal/scope"
 )
 
 // Version is set via -ldflags at release time. Default is a dev marker.

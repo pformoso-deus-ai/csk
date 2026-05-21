@@ -1,4 +1,4 @@
-module github.com/pformoso/csk
+module github.com/pformoso-deus-ai/csk
 
 go 1.23
 

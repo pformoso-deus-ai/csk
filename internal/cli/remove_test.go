@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/pformoso/csk/internal/exitcode"
-	"github.com/pformoso/csk/internal/lockfile"
-	"github.com/pformoso/csk/internal/manifest"
+	"github.com/pformoso-deus-ai/csk/internal/exitcode"
+	"github.com/pformoso-deus-ai/csk/internal/lockfile"
+	"github.com/pformoso-deus-ai/csk/internal/manifest"
 )
 
 func TestRemove_DropsEntryAndJunction(t *testing.T) {

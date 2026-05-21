@@ -12,9 +12,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pformoso/csk/internal/gitx"
-	"github.com/pformoso/csk/internal/link"
-	"github.com/pformoso/csk/internal/scope"
+	"github.com/pformoso-deus-ai/csk/internal/gitx"
+	"github.com/pformoso-deus-ai/csk/internal/link"
+	"github.com/pformoso-deus-ai/csk/internal/scope"
 )
 
 // Plan describes the desired state for one skill.

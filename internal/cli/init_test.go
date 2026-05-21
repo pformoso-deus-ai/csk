@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/pformoso/csk/internal/cli"
-	"github.com/pformoso/csk/internal/exitcode"
-	"github.com/pformoso/csk/internal/lockfile"
-	"github.com/pformoso/csk/internal/manifest"
+	"github.com/pformoso-deus-ai/csk/internal/cli"
+	"github.com/pformoso-deus-ai/csk/internal/exitcode"
+	"github.com/pformoso-deus-ai/csk/internal/lockfile"
+	"github.com/pformoso-deus-ai/csk/internal/manifest"
 )
 
 // useFakeHome points HOME/USERPROFILE at a temp dir so tests don't touch

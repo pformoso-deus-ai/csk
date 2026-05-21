@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/pformoso/csk/internal/cli"
-	"github.com/pformoso/csk/internal/exitcode"
+	"github.com/pformoso-deus-ai/csk/internal/cli"
+	"github.com/pformoso-deus-ai/csk/internal/exitcode"
 )
 
 func main() {

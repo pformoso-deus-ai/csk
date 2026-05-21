@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/pformoso/csk/internal/lockfile"
+	"github.com/pformoso-deus-ai/csk/internal/lockfile"
 )
 
 func TestUpdate_AdvancesLockfileToNewCommit(t *testing.T) {
