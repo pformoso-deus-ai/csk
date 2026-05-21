@@ -6,6 +6,20 @@ import (
 	"testing"
 )
 
+func TestKind_String(t *testing.T) {
+	cases := map[Kind]string{
+		Global:  "global",
+		Project: "project",
+		Unknown: "unknown",
+		Kind(99): "unknown",
+	}
+	for k, want := range cases {
+		if got := k.String(); got != want {
+			t.Errorf("Kind(%d).String() = %q, want %q", k, got, want)
+		}
+	}
+}
+
 func TestResolve_ForceGlobalAndProjectConflict(t *testing.T) {
 	if _, err := Resolve("/cwd", "/home", true, true); err == nil {
 		t.Error("expected conflict error")

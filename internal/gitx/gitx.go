@@ -98,7 +98,17 @@ func HardReset(ctx context.Context, dir string) error {
 	return err
 }
 
-// HeadCommit returns the commit SHA at HEAD.
+// HeadCommit returns the commit SHA at the *local* HEAD.
+//
+// This deliberately does NOT route through ResolveRef. ResolveRef tries
+// `origin/<ref>` first for fresh-from-fetch branch resolution; for HEAD that
+// would mean `origin/HEAD` — the remote's default branch — which is not what
+// a drift check wants. Drift means "the cache HEAD has moved off the locked
+// commit", which is a question about the local HEAD only.
 func HeadCommit(ctx context.Context, dir string) (string, error) {
-	return ResolveRef(ctx, dir, "HEAD")
+	out, err := Default.Run(ctx, dir, "rev-parse", "--verify", "HEAD^{commit}")
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(out)), nil
 }

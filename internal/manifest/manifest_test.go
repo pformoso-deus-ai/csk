@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -71,5 +72,41 @@ func TestRefOrDefault(t *testing.T) {
 	}
 	if got := (Entry{Ref: "v2"}).RefOrDefault(); got != "v2" {
 		t.Errorf("Ref=v2 → %q", got)
+	}
+}
+
+func TestLoad_MissingFile(t *testing.T) {
+	_, err := Load("nonexistent.toml")
+	if err == nil {
+		t.Error("expected error for missing file")
+	}
+}
+
+func TestLoad_MalformedTOML(t *testing.T) {
+	p := t.TempDir() + "/bad.toml"
+	if err := os.WriteFile(p, []byte("this = is not valid toml ===="), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(p); err == nil {
+		t.Error("expected parse error")
+	}
+}
+
+func TestLoad_FailsValidation(t *testing.T) {
+	p := t.TempDir() + "/bad.toml"
+	// Wrong version field.
+	if err := os.WriteFile(p, []byte("version = 99\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(p); err == nil {
+		t.Error("expected validation error")
+	}
+}
+
+func TestValidate_RejectsEmptyName(t *testing.T) {
+	m := New()
+	m.Skills[""] = Entry{Source: "x"}
+	if err := m.Validate(); err == nil {
+		t.Error("expected validation error for empty name")
 	}
 }

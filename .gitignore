@@ -8,6 +8,8 @@
 *.test
 *.out
 coverage.*
+cover
+cover.out
 go.work
 go.work.sum
 

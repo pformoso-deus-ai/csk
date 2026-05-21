@@ -1,9 +1,36 @@
 package lockfile
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
+
+func TestLoad_MissingFile(t *testing.T) {
+	if _, err := Load("nonexistent.lock"); err == nil {
+		t.Error("expected error for missing file")
+	}
+}
+
+func TestLoad_MalformedTOML(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "bad.lock")
+	if err := os.WriteFile(p, []byte("not = valid ===="), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(p); err == nil {
+		t.Error("expected parse error")
+	}
+}
+
+func TestLoad_FailsValidation(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "bad.lock")
+	if err := os.WriteFile(p, []byte("version = 99\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(p); err == nil {
+		t.Error("expected validation error")
+	}
+}
 
 func TestSaveLoadRoundtrip(t *testing.T) {
 	p := filepath.Join(t.TempDir(), "skills.lock")

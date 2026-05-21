@@ -3,8 +3,11 @@ package atomicfile
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
+
+func runtimeIsWindows() bool { return runtime.GOOS == "windows" }
 
 func TestWriteFile_CreatesFile(t *testing.T) {
 	dir := t.TempDir()
@@ -44,6 +47,37 @@ func TestWriteFile_CreatesParentDir(t *testing.T) {
 	}
 	if _, err := os.Stat(p); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestWriteFile_ParentIsAFile(t *testing.T) {
+	dir := t.TempDir()
+	// Make a regular file, then try to write inside it as if it were a dir.
+	notADir := filepath.Join(dir, "blocker")
+	if err := os.WriteFile(notADir, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	target := filepath.Join(notADir, "child", "f.txt")
+	if err := WriteFile(target, []byte("hi"), 0o644); err == nil {
+		t.Error("expected error: parent of target is a regular file")
+	}
+}
+
+func TestWriteFile_PreservesPermissionsArg(t *testing.T) {
+	if runtimeIsWindows() {
+		t.Skip("file modes don't map cleanly on Windows")
+	}
+	dir := t.TempDir()
+	p := filepath.Join(dir, "x.txt")
+	if err := WriteFile(p, []byte("ok"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	fi, err := os.Stat(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fi.Mode().Perm() != 0o600 {
+		t.Errorf("perm = %v, want 0600", fi.Mode().Perm())
 	}
 }
 
