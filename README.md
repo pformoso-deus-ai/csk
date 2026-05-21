@@ -81,6 +81,7 @@ For a per-project skill set, run the same commands from inside the project. `csk
 | `csk list` | Tabular view of every skill with state: `clean` / `drifted` / `missing` / `unlinked` / `manifest-only` / `lock-only` |
 | `csk adopt <name> --source URL` | Register a hand-installed skill: byte-diff existing dir against the source, swap to junction on match |
 | `csk doctor` | Read-only diagnosis of cache / junction / manifest / lockfile drift |
+| `csk upgrade` | Replace the csk binary itself with the latest GitHub release. `--check` only previews. |
 
 Run any command with `--help` for its full flag surface.
 
