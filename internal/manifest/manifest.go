@@ -50,6 +50,9 @@ func Load(path string) (*File, error) {
 	if err := toml.Unmarshal(b, &f); err != nil {
 		return nil, fmt.Errorf("parse %s: %w", path, err)
 	}
+	if f.Skills == nil {
+		f.Skills = map[string]Entry{}
+	}
 	if err := f.Validate(); err != nil {
 		return nil, fmt.Errorf("validate %s: %w", path, err)
 	}

@@ -51,7 +51,7 @@ Tool-managed. One `[[skill]]` block per entry, with `commit = "<full SHA>"`. OS-
 
 ## Building from source
 
-`csk` is written in Go. You need Go 1.22+ and `git` on `PATH`.
+`csk` is written in Go. You need Go 1.23+ and `git` on `PATH`.
 
 ```sh
 go build -o csk ./cmd/csk
